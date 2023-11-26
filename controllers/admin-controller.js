@@ -9,29 +9,27 @@ exports.addAdmin = function(req, res, next) {
     return res.status(422).json({ message: "Invalid Inputs" });
   }
 
-  var existingAdmin;
-  try {
-    existingAdmin = Admin.findOne({ email: email });
-  } catch (err) {
-    return console.log(err);
-  }
+  Admin.findOne({ email: email }, function(err, existingAdmin) {
+    if (err) {
+      return console.log(err);
+    }
 
-  if (existingAdmin) {
-    return res.status(400).json({ message: "Admin already exists" });
-  }
+    if (existingAdmin) {
+      return res.status(400).json({ message: "Admin already exists" });
+    }
 
-  var admin;
-  var hashedPassword = bcrypt.hashSync(password);
-  try {
+    var admin;
+    var hashedPassword = bcrypt.hashSync(password);
     admin = new Admin({ email: email, password: hashedPassword });
-    admin = admin.save();
-  } catch (err) {
-    return console.log(err);
-  }
-  if (!admin) {
-    return res.status(500).json({ message: "Unable to store admin" });
-  }
-  return res.status(201).json({ admin: admin });
+    
+    admin.save(function(err, savedAdmin) {
+      if (err) {
+        return console.log(err);
+      }
+
+      return res.status(201).json({ admin: savedAdmin });
+    });
+  });
 };
 
 exports.adminLogin = function(req, res, next) {
@@ -40,54 +38,54 @@ exports.adminLogin = function(req, res, next) {
   if (!email && email.trim() === "" && !password && password.trim() === "") {
     return res.status(422).json({ message: "Invalid Inputs" });
   }
-  var existingAdmin;
-  try {
-    existingAdmin = Admin.findOne({ email: email });
-  } catch (err) {
-    return console.log(err);
-  }
-  if (!existingAdmin) {
-    return res.status(400).json({ message: "Admin not found" });
-  }
-  var isPasswordCorrect = bcrypt.compareSync(password, existingAdmin.password);
 
-  if (!isPasswordCorrect) {
-    return res.status(400).json({ message: "Incorrect Password" });
-  }
+  Admin.findOne({ email: email }, function(err, existingAdmin) {
+    if (err) {
+      return console.log(err);
+    }
 
-  var token = jwt.sign({ id: existingAdmin._id }, process.env.SECRET_KEY, {
-    expiresIn: "7d",
+    if (!existingAdmin) {
+      return res.status(400).json({ message: "Admin not found" });
+    }
+
+    var isPasswordCorrect = bcrypt.compareSync(password, existingAdmin.password);
+
+    if (!isPasswordCorrect) {
+      return res.status(400).json({ message: "Incorrect Password" });
+    }
+
+    var token = jwt.sign({ id: existingAdmin._id }, process.env.SECRET_KEY, {
+      expiresIn: "7d",
+    });
+
+    return res
+      .status(200)
+      .json({ message: "Authentication Complete", token: token, id: existingAdmin._id });
   });
-
-  return res
-    .status(200)
-    .json({ message: "Authentication Complete", token: token, id: existingAdmin._id });
 };
 
 exports.getAdmins = function(req, res, next) {
-  var admins;
-  try {
-    admins = Admin.find();
-  } catch (err) {
-    return console.log(err);
-  }
-  if (!admins) {
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
-  return res.status(200).json({ admins: admins });
+  Admin.find({}, function(err, admins) {
+    if (err) {
+      return console.log(err);
+    }
+
+    return res.status(200).json({ admins: admins });
+  });
 };
 
 exports.getAdminById = function(req, res, next) {
   var id = req.params.id;
 
-  var admin;
-  try {
-    admin = Admin.findById(id).populate("addedMovies");
-  } catch (err) {
-    return console.log(err);
-  }
-  if (!admin) {
-    return console.log("Cannot find Admin");
-  }
-  return res.status(200).json({ admin: admin });
+  Admin.findById(id).populate("addedMovies").exec(function(err, admin) {
+    if (err) {
+      return console.log(err);
+    }
+
+    if (!admin) {
+      return console.log("Cannot find Admin");
+    }
+
+    return res.status(200).json({ admin: admin });
+  });
 };
