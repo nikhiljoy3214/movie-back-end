@@ -1,13 +1,13 @@
-import express from "express";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
-import userRouter from "./routes/user-routes";
-import adminRouter from "./routes/admin-routes";
-import movieRouter from "./routes/movie-routes";
-import bookingsRouter from "./routes/booking-routes";
-import cors from "cors";
+var express = require("express");
+var mongoose = require("mongoose");
+var dotenv = require("dotenv");
+var userRouter = require("./routes/user-routes");
+var adminRouter = require("./routes/admin-routes");
+var movieRouter = require("./routes/movie-routes");
+var bookingsRouter = require("./routes/booking-routes");
+var cors = require("cors");
 dotenv.config();
-const app = express();
+var app = express();
 
 // middlewares
 app.use(cors());
@@ -19,11 +19,15 @@ app.use("/booking", bookingsRouter);
 
 mongoose
   .connect(
-    `mongodb+srv://nikhiljoy16:${process.env.MONGODB_PASSWORD}@cluster0.yjddqk0.mongodb.net/?retryWrites=true&w=majority`
+    "mongodb+srv://nikhiljoy16:" +
+      process.env.MONGODB_PASSWORD +
+      "@cluster0.yjddqk0.mongodb.net/?retryWrites=true&w=majority"
   )
-  .then(() =>
-    app.listen(5000, () => 
-      console.log("Connected To Database And Server is running") 
-    )
-  )
-  .catch((e) => console.log(e));
+  .then(function () {
+    app.listen(5000, function () {
+      console.log("Connected To Database And Server is running");
+    });
+  })
+  .catch(function (e) {
+    console.log(e);
+  });

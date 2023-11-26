@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
+var mongoose = require("mongoose");
 
-const adminSchema = new mongoose.Schema({
+var adminSchema = new mongoose.Schema({
   email: {
     type: String,
     unique: true,
@@ -19,4 +19,4 @@ const adminSchema = new mongoose.Schema({
   ],
 });
 
-export default mongoose.model("Admin", adminSchema);
+module.exports = mongoose.model("Admin", adminSchema);

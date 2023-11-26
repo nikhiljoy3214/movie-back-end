@@ -1,16 +1,11 @@
-import express from "express";
-import {
-  addAdmin,
-  adminLogin,
-  getAdminById,
-  getAdmins,
-} from "../controllers/admin-controller";
+var express = require("express");
+var adminController = require("../controllers/admin-controller");
 
-const adminRouter = express.Router();
+var adminRouter = express.Router();
 
-adminRouter.post("/signup", addAdmin);
-adminRouter.post("/login", adminLogin);
-adminRouter.get("/", getAdmins);
-adminRouter.get("/:id", getAdminById);
+adminRouter.post("/signup", adminController.addAdmin);
+adminRouter.post("/login", adminController.adminLogin);
+adminRouter.get("/", adminController.getAdmins);
+adminRouter.get("/:id", adminController.getAdminById);
 
-export default adminRouter;
+module.exports = adminRouter;

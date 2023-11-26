@@ -1,6 +1,6 @@
-import mongoose from "mongoose";
+var mongoose = require("mongoose");
 
-const bookingSchema = new mongoose.Schema({
+var bookingSchema = new mongoose.Schema({
   movie: {
     type: mongoose.Types.ObjectId,
     ref: "Movie",
@@ -11,14 +11,14 @@ const bookingSchema = new mongoose.Schema({
     required: true,
   },
   seatNumber: {
-    type: Number,
+    type: Array,
     required: true,
   },
   user: {
     type: mongoose.Types.ObjectId,
     ref: "User",
-    required: true, 
+    required: true,
   },
 });
 
-export default mongoose.model("Booking", bookingSchema);
+module.exports = mongoose.model("Booking", bookingSchema);

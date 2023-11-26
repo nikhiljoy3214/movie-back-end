@@ -1,17 +1,18 @@
-import jwt from "jsonwebtoken";
-import mongoose from "mongoose";
-import Admin from "../models/Admin";
-import Movie from "../models/Movie";
-export const addMovie = async (req, res, next) => {
-  const extractedToken = req.headers.authorization.split(" ")[1];
+var jwt = require("jsonwebtoken");
+var mongoose = require("mongoose");
+var Admin = require("../models/Admin");
+var Movie = require("../models/Movie");
+
+exports.addMovie = async function(req, res, next) {
+  var extractedToken = req.headers.authorization.split(" ")[1];
   if (!extractedToken && extractedToken.trim() === "") {
     return res.status(404).json({ message: "Token Not Found" });
   }
 
-  let adminId;
+  var adminId;
 
   // verify token
-  jwt.verify(extractedToken, process.env.SECRET_KEY, (err, decrypted) => {
+  jwt.verify(extractedToken, process.env.SECRET_KEY, function(err, decrypted) {
     if (err) {
       return res.status(400).json({ message: `${err.message}` });
     } else {
@@ -20,9 +21,8 @@ export const addMovie = async (req, res, next) => {
     }
   });
 
-  //create new movie
-  const { title, description, releaseDate, posterUrl, featured, actors } =
-    req.body;
+  // create new movie
+  var { title, description, releaseDate, posterUrl, featured, actors } = req.body;
   if (
     !title &&
     title.trim() === "" &&
@@ -34,7 +34,7 @@ export const addMovie = async (req, res, next) => {
     return res.status(422).json({ message: "Invalid Inputs" });
   }
 
-  let movie;
+  var movie;
   try {
     movie = new Movie({
       description,
@@ -45,8 +45,8 @@ export const addMovie = async (req, res, next) => {
       posterUrl,
       title,
     });
-    const session = await mongoose.startSession();
-    const adminUser = await Admin.findById(adminId);
+    var session = await mongoose.startSession();
+    var adminUser = await Admin.findById(adminId);
     session.startTransaction();
     await movie.save({ session });
     adminUser.addedMovies.push(movie);
@@ -63,8 +63,8 @@ export const addMovie = async (req, res, next) => {
   return res.status(201).json({ movie });
 };
 
-export const getAllMovies = async (req, res, next) => {
-  let movies;
+exports.getAllMovies = async function(req, res, next) {
+  var movies;
 
   try {
     movies = await Movie.find();
@@ -78,9 +78,9 @@ export const getAllMovies = async (req, res, next) => {
   return res.status(200).json({ movies });
 };
 
-export const getMovieById = async (req, res, next) => {
-  const id = req.params.id;
-  let movie;
+exports.getMovieById = async function(req, res, next) {
+  var id = req.params.id;
+  var movie;
   try {
     movie = await Movie.findById(id);
   } catch (err) {
